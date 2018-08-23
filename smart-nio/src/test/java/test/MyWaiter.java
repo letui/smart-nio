@@ -14,6 +14,7 @@ public class MyWaiter implements Waiter {
 
 	@Override
 	public ByteBuffer onReceive(ByteBuffer receiveBuf) {
+		System.out.println(receiveBuf.getChar());
 		return receiveBuf;
 	}
 
@@ -24,12 +25,7 @@ public class MyWaiter implements Waiter {
 
 	@Override
 	public void keepWrite(ByteBuffer sendBuf) {
-		try {
-			Thread.sleep(1000l);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		//sendBuf.put("HelloMyBaby".getBytes());
+		sendBuf.put("HelloMyBaby".getBytes());
 	}
 
 }

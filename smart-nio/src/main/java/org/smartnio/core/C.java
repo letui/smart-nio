@@ -38,7 +38,7 @@ public class C {
 					if (channel.isConnectionPending()) {
 						if (channel.finishConnect()) {
 							// 只有当连接成功后才能注册OP_READ事件
-							selectionKey.interestOps(SelectionKey.OP_READ);
+							channel.register(selector,SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 							w.onAccept(channel);
 						} else {
 							selectionKey.cancel();
