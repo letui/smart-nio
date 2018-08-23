@@ -9,10 +9,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-public class $ implements Runnable {
+public class $ extends Thread {
 	public int id = 100000;
 	public int bufferSize = 2048;
-	
+
 	private String ip;
 	private int port;
 	private Waiter w;
@@ -24,21 +24,21 @@ public class $ implements Runnable {
 
 	public static $ server(String ip, int port) {
 		$ _ = new $();
-		_.ip=ip;
-		_.port=port;
+		_.ip = ip;
+		_.port = port;
 		return _;
 	}
-	
+
 	public $ setup(Waiter w) {
-		this.w=w;
+		this.w = w;
 		return this;
 	}
 
 	private void init() {
 		try {
+			InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);
 			ServerSocketChannel socketChannel = ServerSocketChannel.open();
 			Selector selector = Selector.open();
-			InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);
 			socketChannel.socket().bind(inetSocketAddress);
 			socketChannel.configureBlocking(false);
 			socketChannel.register(selector, SelectionKey.OP_ACCEPT).attach(id++);
@@ -50,8 +50,8 @@ public class $ implements Runnable {
 	}
 
 	private void listener(Selector in_selector) {
-		try {
-			while (true) {
+		while (true) {
+			try {
 				in_selector.select(); // 阻塞 直到有就绪事件为止
 				Set<SelectionKey> readySelectionKey = in_selector.selectedKeys();
 				Iterator<SelectionKey> it = readySelectionKey.iterator();
@@ -67,31 +67,31 @@ public class $ implements Runnable {
 						SocketChannel clientChannel = (SocketChannel) selectionKey.channel();
 						ByteBuffer receiveBuf = ByteBuffer.allocate(bufferSize);
 						clientChannel.read(receiveBuf);
-						ByteBuffer sendBuf=w.onReceive(receiveBuf);
-						if(sendBuf!=null) {
+						ByteBuffer sendBuf = w.onReceive(receiveBuf);
+						if (sendBuf != null) {
 							sendBuf.flip();
 							clientChannel.write(sendBuf);
 						}
 					}
 					if (selectionKey.isWritable()) {// 写数据
 						SocketChannel clientChannel = (SocketChannel) selectionKey.channel();
-						ByteBuffer sendBuf = ByteBuffer.allocate(bufferSize);
-						w.keepWrite(sendBuf);
-						sendBuf.flip(); 
-						if(clientChannel.isOpen()) {
-							clientChannel.write(sendBuf);
-						}else {
+						if(clientChannel.read(ByteBuffer.allocate(6))==-1) {
 							clientChannel.close();
+						}else if (clientChannel.isOpen()) {
+							ByteBuffer sendBuf = ByteBuffer.allocate(bufferSize);
+							w.keepWrite(sendBuf);
+							sendBuf.flip();
+							clientChannel.write(sendBuf);
 						}
 					}
 					it.remove();
 				}
-			}
-		} catch (Exception e) {
-			if("Connection reset by peer" .equals(e.getMessage())) {
-				w.onReset();
-			}else {
-				e.printStackTrace();
+			} catch (Exception e) {
+				if ("Connection reset by peer".equals(e.getMessage())) {
+					w.onReset();
+				} else {
+					e.printStackTrace();
+				}
 			}
 		}
 
