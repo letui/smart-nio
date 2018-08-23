@@ -16,7 +16,6 @@ public class $ implements Runnable {
 	private String ip;
 	private int port;
 	private Waiter w;
-	private Thread selfThread;
 
 	@Override
 	public void run() {

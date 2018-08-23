@@ -1,14 +1,14 @@
 package test;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.NetworkChannel;
 
 import org.smartnio.core.Waiter;
 
 public class MyWaiter implements Waiter {
 
 	@Override
-	public void onAccept(ServerSocketChannel cameInChannel) {
+	public void onAccept(NetworkChannel cameInChannel) {
 		
 	}
 
