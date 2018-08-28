@@ -3,8 +3,7 @@
 <h3>换一种方式写Socket吧？</h3>
 <pre>
     $ nio=$.server("127.0.0.1",9907).setup(new MyWaiter());
-		Thread t=new Thread(nio);
-		t.start();
+	nio.start();
 </pre>
 <h3>MyWaiter.class</h3>
 <pre>
